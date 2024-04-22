@@ -27,7 +27,8 @@ class Data:
             # calculate current age with todays date
             age = dt.datetime.now().year - birthdate.year
             # check if birthday has happened this year
-            # TODO
+            if dt.datetime.now().month < birthdate.month or (dt.datetime.now().month == birthdate.month and dt.datetime.now().day < birthdate.day):
+                age -= 1
             # check if its their birthday today 
             if dt.datetime.now().month == birthdate.month and dt.datetime.now().day == birthdate.day:
                 birthday_flag = True
@@ -36,7 +37,25 @@ class Data:
         except:
             return np.nan, np.nan
         return age, birthday_flag
-        
+    
+    def get_usage(self):
+        dates = pd.to_datetime(self.activity_df.dateComponents.values)
+        # get the first day the watch was used 
+        first_use = dates.min().date()
+        # get the number of days the watch has been used
+        dates_used = len(dates.unique())
+        # total days since the watch was first used
+        total_days = (dt.datetime.now().date() - first_use).days
+        # number of days a workout has been tracked 
+        days_workout_tracked = len(pd.to_datetime(self.workout_df.creationDate).dt.date.unique())
+        # total hours tracking activity
+        total_hours = np.round(self.activity_df.appleExerciseTime.astype(float).sum() / 60)
+        # number of workouts tracked
+        total_num_workouts = len(self.workout_df)
+        # most active month 
+        most_active_month = dates.month.value_counts().idxmax()
+
+        return {'first_use': first_use, 'dates_used': dates_used, 'total_days': total_days, 'days_workout_tracked': days_workout_tracked, 'total_hours': total_hours, 'total_num_workouts': total_num_workouts}
 
     def get_workout_dataframe(self):
         # merge workout statistics into the workout dataframe
